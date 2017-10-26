@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Android FSM config converter</string>
+    <string name="live">Live</string>
+    <string name="realTime">Realtime</string>
+    <string name="file">File</string>
+    <string name="realtimeGenerating">Realtime generating</string>
+    <string name="rulesExample">Type your rules\nExample: &lt;number&gt;::=\\d&lt;number&gt;\n&lt;number&gt;::=\n</string>
+    <string name="compileConfig">Compile config</string>
+    <string name="tapToShare">Tap to preview for share:</string>
+    <string name="awaitInputComplete">Await input completing</string>
+    <string name="wrongExpression">Wrong expression</string>
+</resources>
