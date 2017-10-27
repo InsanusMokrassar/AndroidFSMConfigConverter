@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 
-    package="com.insanusmokrassar.fsmconfiggenerator">
+    package="com.github.insanusmokrassar.AndroidFSMConfigConverter">
 
     <application
         android:allowBackup="true"
@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".ChooseSourceActivity">
+        <activity android:name=".frontend.activity.ChooseSourceActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -20,7 +20,7 @@
         </activity>
 
         <activity
-            android:name=".RealTimeActivity"
+            android:name=".frontend.activity.RealTimeActivity"
             android:label="@string/realtimeGenerating"/>
     </application>
 

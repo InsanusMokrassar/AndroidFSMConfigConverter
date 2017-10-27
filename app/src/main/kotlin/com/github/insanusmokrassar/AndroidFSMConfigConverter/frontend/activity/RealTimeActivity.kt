@@ -1,17 +1,16 @@
-package com.insanusmokrassar.fsmconfiggenerator
+package com.github.insanusmokrassar.AndroidFSMConfigConverter.frontend.activity
 
 import android.content.Intent
 import android.content.Intent.ACTION_SEND
 import android.content.Intent.EXTRA_TEXT
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.Log
 import android.widget.EditText
 import android.widget.TextView
 import com.github.insanusmokrassar.FSMConfigConverter.compileFromConfig
 import com.github.insanusmokrassar.FSMConfigConverter.getContent
+import com.github.insanusmokrassar.AndroidFSMConfigConverter.R
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
@@ -25,33 +24,22 @@ class RealTimeActivity: AppCompatActivity() {
         var lastJob: Job? = null
         val compiledTableTextView = findViewById(R.id.compiledTableTextView) as TextView
         val rulesEditText: EditText = (findViewById(R.id.inputRulesEditText) as EditText)
-        var editedTime = 0L
-        Thread {
-            val timeoutToRefresh = resources.getInteger(R.integer.awaitEditedTimeInMillis)
-            while(true) {
-                Thread.sleep(timeoutToRefresh.toLong())
-                if (editedTime != -1L && System.currentTimeMillis() - editedTime < timeoutToRefresh) {
-                    lastJob = startCompile(rulesEditText.text.toString(), compiledTableTextView)
-                    editedTime = -1L
-                }
-            }
-        }.start()
-        rulesEditText.addTextChangedListener(
-                object: TextWatcher {
-                    override fun afterTextChanged(editable: Editable) {}
-
-                    override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                        lastJob ?. cancel()
-                        lastJob = null
-                        compiledTableTextView.text = getString(R.string.awaitInputComplete)
-                        compiledTableTextView.isClickable = false
-                    }
-
-                    override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                        editedTime = System.currentTimeMillis()
-                    }
-                }
-        )
+//        rulesEditText.addTextChangedListener(
+//                object: TextWatcher {
+//                    override fun afterTextChanged(editable: Editable) {}
+//
+//                    override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+//                        lastJob ?. cancel()
+//                        lastJob = null
+//                        compiledTableTextView.text = getString(R.string.awaitInputComplete)
+//                        compiledTableTextView.isClickable = false
+//                    }
+//
+//                    override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+//                        editedTime = System.currentTimeMillis()
+//                    }
+//                }
+//        )
 
         compiledTableTextView.setOnClickListener {
             if (compiledTableTextView.text.isNotEmpty()) {
@@ -62,10 +50,14 @@ class RealTimeActivity: AppCompatActivity() {
                 startActivity(shareIntent)
             }
         }
+        findViewById(R.id.compileConfigBtn).setOnClickListener {
+            lastJob ?. cancel()
+            lastJob = startCompile(rulesEditText.text.toString(), compiledTableTextView)
+        }
     }
 
     private fun startCompile(from: String, tableTextView: TextView): Job {
-       return async {
+        return async {
             val content: String = try {
                 Log.i(RealTimeActivity::class.java.simpleName, "Thread: " + Thread.currentThread().name)
                 val preStates = compileFromConfig(from)

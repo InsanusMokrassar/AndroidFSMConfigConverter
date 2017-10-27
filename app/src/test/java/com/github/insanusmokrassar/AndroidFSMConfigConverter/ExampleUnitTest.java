@@ -1,4 +1,4 @@
-package com.insanusmokrassar.fsmconfiggenerator;
+package com.github.insanusmokrassar.AndroidFSMConfigConverter;
 
 import org.junit.Test;
 

@@ -1,4 +1,4 @@
-package com.insanusmokrassar.fsmconfiggenerator;
+package com.github.insanusmokrassar.AndroidFSMConfigConverter;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.insanusmokrassar.fsmconfiggenerator", appContext.getPackageName());
+        assertEquals("com.github.insanusmokrassar.fsmconfiggenerator", appContext.getPackageName());
     }
 }

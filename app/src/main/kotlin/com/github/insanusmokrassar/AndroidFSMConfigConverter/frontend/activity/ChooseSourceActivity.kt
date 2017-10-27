@@ -1,10 +1,11 @@
-package com.insanusmokrassar.fsmconfiggenerator
+package com.github.insanusmokrassar.AndroidFSMConfigConverter.frontend.activity
 
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
+import com.github.insanusmokrassar.AndroidFSMConfigConverter.R
 
 class ChooseSourceActivity: AppCompatActivity() {
 
