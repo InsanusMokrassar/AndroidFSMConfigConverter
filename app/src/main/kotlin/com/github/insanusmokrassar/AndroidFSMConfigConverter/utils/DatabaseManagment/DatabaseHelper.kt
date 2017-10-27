@@ -64,9 +64,9 @@ fun Any.toContentValues(): ContentValues {
     return toValuesMap().toContentValues()
 }
 
-fun Any.getVariablesMap(): Map<String, KProperty<*>> {
+fun KClass<*>.getVariablesMap(): Map<String, KProperty<*>> {
     val futureMap = LinkedHashMap<String, KProperty<*>>()
-    this::class.getVariables().forEach {
+    this.getVariables().forEach {
         futureMap.put(it.name, it)
     }
     return futureMap
@@ -75,7 +75,7 @@ fun Any.getVariablesMap(): Map<String, KProperty<*>> {
 fun Any.toValuesMap() : Map<KProperty<*>, Any> {
     val values = HashMap<KProperty<*>, Any>()
 
-    getVariablesMap().values.filter {
+    this::class.getVariablesMap().values.filter {
         it.intsanceKClass() != Any::class && (!it.returnType.isMarkedNullable || it.call(this) != null)
     }.forEach {
         it.call(this)?.let { value ->
@@ -88,42 +88,72 @@ fun Any.toValuesMap() : Map<KProperty<*>, Any> {
     return values
 }
 
-fun <M: Any> KClass<M>.fromValuesMap(values : Map<KProperty<*>, Any>): M {
+fun <M: Any> KClass<M>.fromValuesMap(values : Map<KProperty<*>, Any?>): M {
     if (constructors.isEmpty()) {
         throw IllegalStateException("For some of reason, can't create correct realisation of model")
     } else {
-        val constructorRequiredVariables = getRequiredInConstructor()
         val resultModelConstructor = constructors.first {
-            if (it.parameters.size != constructorRequiredVariables.size + 1) {
-                return@first false
-            }
-            it.parameters.indices
-                    .filter { i -> i < 1 || it.parameters[i].type.classifier != constructorRequiredVariables[i - 1].returnType.classifier }
-                    .forEach { return@first false }
-            true
+            it.parameters.size == values.size
         }
         val paramsList = ArrayList<Any?>()
-        constructorRequiredVariables.forEach {
-            paramsList.add(
-                    values[it]
-            )
+        resultModelConstructor.parameters.forEach {
+            parameter ->
+            val key = values.keys.firstOrNull { parameter.name == it.name }
+            key ?. let {
+                paramsList.add(
+                        values[key]
+                )
+            } ?: paramsList.add(null)
         }
         val result = resultModelConstructor.call(*paramsList.toTypedArray())
-        values.keys.forEach {
-            if (!constructorRequiredVariables.contains(it)) {
-                (it as KMutableProperty).setter.call(result, values[it])
-            }
-        }
+//        values.keys.forEach {
+//            if (!constructorRequiredVariables.contains(it)) {
+//                (it as KMutableProperty).setter.call(result, values[it])
+//            }
+//        }
         return result
     }
 }
 
-fun <M: Any> Cursor.extractAllAndClose(modelClass: KClass<M>): M {
+private val extractMap = mapOf<Int, (Cursor, Int) -> Any>(
+        Pair(
+                Cursor.FIELD_TYPE_INTEGER,
+                {
+                    cursor, columnIndex ->
+                    cursor.getInt(columnIndex)
+                }
+        ),
+        Pair(
+                Cursor.FIELD_TYPE_FLOAT,
+                {
+                    cursor, columnIndex ->
+                    cursor.getFloat(columnIndex)
+                }
+        ),
+        Pair(
+                Cursor.FIELD_TYPE_STRING,
+                {
+                    cursor, columnIndex ->
+                    cursor.getString(columnIndex)
+                }
+        ),
+        Pair(
+                Cursor.FIELD_TYPE_BLOB,
+                {
+                    cursor, columnIndex ->
+                    cursor.getBlob(columnIndex)
+                }
+        )
+)
+
+fun <M: Any> Cursor.extract(modelClass: KClass<M>): M {
     val properties = modelClass.getVariablesMap()
-    val values = HashMap<KProperty<*>, Any>()
+    val values = HashMap<KProperty<*>, Any?>()
     properties.values.forEach {
+        val columnIndex = getColumnIndex(it.name)
         values.put(
-                it, extras[it.name]
+                it,
+                extractMap[getType(columnIndex)] ?. invoke(this, columnIndex)
         )
     }
     return modelClass.fromValuesMap(values)
@@ -133,7 +163,7 @@ fun <M: Any> Cursor.extractAll(modelClass: KClass<M>, close: Boolean = true): Li
     val result = ArrayList<M>()
     if (moveToFirst()) {
         do {
-            result.add(extractAllAndClose(modelClass))
+            result.add(extract(modelClass))
         } while (moveToNext())
     }
     if (close) {
@@ -144,15 +174,17 @@ fun <M: Any> Cursor.extractAll(modelClass: KClass<M>, close: Boolean = true): Li
 
 fun <M : Any> SQLiteDatabase.createTableIfNotExist(modelClass: KClass<M>) {
     val fieldsBuilder = StringBuilder()
-    val primaryFields = modelClass.getPrimaryFields()
 
     modelClass.getVariables().forEach {
         if (it.isReturnNative()) {
             fieldsBuilder.append("${it.name} ${nativeTypesMap[it.returnClass()]}")
+            if (it.isPrimaryField()) {
+                fieldsBuilder.append(" PRIMARY KEY")
+            }
             if (!it.isNullable()) {
                 fieldsBuilder.append(" NOT NULL")
             }
-            if (primaryFields.contains(it) && it.isAutoincrement()) {
+            if (it.isAutoincrement()) {
                 fieldsBuilder.append(" AUTOINCREMENT")
             }
         } else {
@@ -160,24 +192,13 @@ fun <M : Any> SQLiteDatabase.createTableIfNotExist(modelClass: KClass<M>) {
         }
         fieldsBuilder.append(", ")
     }
-    if (primaryFields.isNotEmpty()) {
-        fieldsBuilder.append("CONSTRAINT ${modelClass.tableName()}_PR_KEY PRIMARY KEY (")
-        primaryFields.forEach {
-            fieldsBuilder.append(it.name)
-            if (!primaryFields.isLast(it)) {
-                fieldsBuilder.append(", ")
-            }
-        }
-        fieldsBuilder.append(")")
-    }
 
     try {
-        execSQL("CREATE TABLE IF NOT EXISTS ${modelClass.tableName()} ($fieldsBuilder);")
+        execSQL("CREATE TABLE IF NOT EXISTS ${modelClass.tableName()} " +
+                "(${fieldsBuilder.replace(Regex(", $"), "")});")
         Log.i("createTableIfNotExist", "Table ${modelClass.tableName()} was created")
     } catch (e: Exception) {
         Log.e("createTableIfNotExist", "init", e)
         throw IllegalArgumentException("Can't create table ${modelClass.tableName()}", e)
     }
 }
-
-

@@ -9,4 +9,7 @@
     <string name="tapToShare">Tap to preview for share:</string>
     <string name="awaitInputComplete">Await input completing</string>
     <string name="wrongExpression">Wrong expression</string>
+    <string name="emptyConfigs">There is no configs</string>
+    <string name="create">Create</string>
+    <string name="configToEdit">configToEdit</string>
 </resources>

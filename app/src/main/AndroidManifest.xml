@@ -10,18 +10,19 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".frontend.activity.ChooseSourceActivity">
+        <activity android:name=".frontend.activity.ChooseSourceActivity"/>
+
+        <activity
+            android:name=".frontend.activity.ChangeConfigActivity"
+            android:label="@string/realtimeGenerating"/>
+
+        <activity android:name=".frontend.activity.ConfigsListActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
-
-        <activity
-            android:name=".frontend.activity.RealTimeActivity"
-            android:label="@string/realtimeGenerating"/>
     </application>
 
 </manifest>

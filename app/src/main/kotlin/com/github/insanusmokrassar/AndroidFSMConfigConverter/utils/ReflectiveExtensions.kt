@@ -1,7 +1,9 @@
 package com.github.insanusmokrassar.AndroidFSMConfigConverter.utils
 
 import kotlin.reflect.*
+import kotlin.reflect.full.declaredMembers
 import kotlin.reflect.full.instanceParameter
+import kotlin.reflect.full.memberProperties
 
 @Target(AnnotationTarget.PROPERTY)
 @MustBeDocumented
@@ -55,8 +57,8 @@ fun KCallable<*>.isReturnNative() : Boolean {
  * @return Список KCallable объектов, помеченных аннотацией [PrimaryKey].
  */
 fun KClass<*>.getPrimaryFields() : List<KCallable<*>> {
-    return this.members.filter {
-        it is KProperty<*> && it.isPrimaryField()
+    return getVariables().filter {
+        it.isPrimaryField()
     }
 }
 
@@ -64,12 +66,7 @@ fun KClass<*>.getPrimaryFields() : List<KCallable<*>> {
  * @return true если объект помечен аннотацией [PrimaryKey].
  */
 fun KProperty<*>.isPrimaryField() : Boolean {
-    this.annotations.forEach {
-        if (it.annotationClass == PrimaryKey::class) {
-            return@isPrimaryField true
-        }
-    }
-    return false
+    return this.annotations.firstOrNull { it.annotationClass == PrimaryKey::class } != null
 }
 
 /**
@@ -96,18 +93,16 @@ fun KProperty<*>.isMutable() : Boolean {
  * и not null поля.
  */
 fun KClass<*>.getRequiredInConstructor() : List<KProperty<*>> {
-    return this.members.filter {
-        it is KProperty<*> && (!it.isMutable() || !it.isNullable())
-    } as List<KProperty<*>>
+    return getVariables().filter {
+        !it.isMutable() || !it.isNullable()
+    }
 }
 
 /**
  * @return Список полей класса.
  */
 fun KClass<*>.getVariables() : List<KProperty<*>> {
-    return this.members.filter {
-        it is KProperty<*>
-    } as List<KProperty<*>>
+    return this.memberProperties.toList()
 }
 
 /**

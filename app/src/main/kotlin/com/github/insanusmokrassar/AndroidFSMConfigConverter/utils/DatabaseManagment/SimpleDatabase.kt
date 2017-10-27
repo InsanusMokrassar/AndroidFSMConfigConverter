@@ -17,7 +17,7 @@ open class SimpleDatabase<M: Any> (
         version
 ) {
     override fun onCreate(db: SQLiteDatabase) {
-        db.createTableIfNotExist(modelClass::class)
+        db.createTableIfNotExist(modelClass)
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, p1: Int, p2: Int) {

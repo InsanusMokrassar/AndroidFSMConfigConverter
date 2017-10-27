@@ -4,6 +4,7 @@ import android.content.Context
 import com.github.insanusmokrassar.AndroidFSMConfigConverter.R
 import com.github.insanusmokrassar.AndroidFSMConfigConverter.utils.Autoincrement
 import com.github.insanusmokrassar.AndroidFSMConfigConverter.utils.PrimaryKey
+import java.io.Serializable
 
 fun Context.getConfigsDatabases(): ConfigsDatabase {
     return ConfigsDatabase(this)
@@ -18,6 +19,7 @@ class ConfigsDatabase(context: Context): SimpleDatabase<Config>(
     fun upsert(config: Config) {
         if (config.id == null) {
             insert(config)
+            config.id = find("config=\"${config.config}\" AND name=\"${config.name}\"").first().id
         } else {
             update(config)
         }
@@ -31,9 +33,11 @@ class ConfigsDatabase(context: Context): SimpleDatabase<Config>(
 }
 
 data class Config internal constructor(
-        val config: String,
-        val name: String,
+        var config: String = "",
+        var name: String = "",
         @PrimaryKey
         @Autoincrement
-        internal var id: Long? = null
-)
+        internal var id: Int? = null
+) : Serializable {
+    constructor(another: Config) : this(another.config, another.name, another.id)
+}

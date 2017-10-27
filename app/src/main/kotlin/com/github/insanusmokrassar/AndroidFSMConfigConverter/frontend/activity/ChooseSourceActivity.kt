@@ -13,7 +13,7 @@ class ChooseSourceActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_choose_source)
         findViewById(R.id.realtimeBtn).setOnClickListener {
-            val intent = Intent(this, RealTimeActivity::class.java)
+            val intent = Intent(this, ChangeConfigActivity::class.java)
             startActivity(intent)
         }
         findViewById(R.id.fileBtn).setOnClickListener {
