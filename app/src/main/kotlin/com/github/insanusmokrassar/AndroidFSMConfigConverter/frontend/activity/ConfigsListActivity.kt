@@ -20,6 +20,22 @@ class ConfigsListActivity: AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_configs_list)
+    }
+
+    private val optionsMenuCallbacks = mapOf (
+            Pair(
+                    R.id.createConfigMenuItem,
+                    {
+                        val intent = Intent(this, ChangeConfigActivity::class.java)
+                        intent.putExtra(getString(R.string.configToEdit), Config())
+                        startActivity(intent)
+                        true
+                    }
+            )
+    )
+
+    override fun onResume() {
+        super.onResume()
         val configsList = findViewById(R.id.configsListRecyclerView) as RecyclerView
         val adapter = RecyclerViewAdapter(
                 {
@@ -29,7 +45,6 @@ class ConfigsListActivity: AppCompatActivity() {
         )
         adapter.emptyView = findViewById(R.id.emptyConfigsTextView)
         configsList.adapter = adapter
-
         async {
             try {
                 val configs = getConfigsDatabases().find().toTypedArray()
@@ -44,18 +59,6 @@ class ConfigsListActivity: AppCompatActivity() {
             }
         }
     }
-
-    private val optionsMenuCallbacks = mapOf (
-            Pair(
-                    R.id.createConfigMenuItem,
-                    {
-                        val intent = Intent(this, ChangeConfigActivity::class.java)
-                        intent.putExtra(getString(R.string.configToEdit), Config())
-                        startActivity(intent)
-                        true
-                    }
-            )
-    )
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater ?. inflate(R.menu.activity_configs_list, menu)

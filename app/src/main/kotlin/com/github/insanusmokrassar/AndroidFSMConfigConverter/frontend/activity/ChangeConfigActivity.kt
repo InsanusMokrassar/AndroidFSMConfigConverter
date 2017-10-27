@@ -11,12 +11,12 @@ import android.util.Log
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import android.widget.Toast.LENGTH_SHORT
 import com.github.insanusmokrassar.FSMConfigConverter.compileFromConfig
 import com.github.insanusmokrassar.FSMConfigConverter.getContent
 import com.github.insanusmokrassar.AndroidFSMConfigConverter.R
 import com.github.insanusmokrassar.AndroidFSMConfigConverter.utils.DatabaseManagment.Config
 import com.github.insanusmokrassar.AndroidFSMConfigConverter.utils.DatabaseManagment.getConfigsDatabases
-import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
@@ -28,11 +28,15 @@ class ChangeConfigActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val config: Config = intent.extras[getString(R.string.configToEdit)] as? Config ?: Config()
-        setContentView(R.layout.activity_realtime)
+        setContentView(R.layout.activity_change_config)
         val databaseHelper = getConfigsDatabases()
         var lastJob: Job? = null
         val compiledTableTextView = findViewById(R.id.compiledTableTextView) as TextView
-        val rulesEditText: EditText = (findViewById(R.id.inputRulesEditText) as EditText)
+        val configEditText: EditText = (findViewById(R.id.configRulesEditText) as EditText)
+        val titleEditText: EditText = (findViewById(R.id.configTitleEditText) as EditText)
+
+        configEditText.setText(config.rules)
+        titleEditText.setText(config.title)
 
         val delayObservable = PublishSubject.create<Editable>()
         delayObservable.debounce (
@@ -40,23 +44,33 @@ class ChangeConfigActivity : AppCompatActivity() {
                 TimeUnit.MILLISECONDS
         ).subscribe({
             try {
-                config.config = it.toString()
+                config.rules = configEditText.text.toString()
+                config.title = if (titleEditText.text.isEmpty()) {
+                    getString(R.string.tempTitle)
+                } else {
+                    titleEditText.text.toString()
+                }
                 databaseHelper.upsert(config)
+                launch (UI) {
+                    Toast.makeText(
+                            this@ChangeConfigActivity,
+                            getString(R.string.updated),
+                            LENGTH_SHORT
+                    ).show()
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         })
-        rulesEditText.addTextChangedListener(
-                object: TextWatcher {
-                    override fun afterTextChanged(editable: Editable) {
-                        delayObservable.onNext(editable)
-                    }
-
-                    override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-
-                    override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-                }
-        )
+        val changesWatcher = object: TextWatcher {
+            override fun afterTextChanged(editable: Editable) {
+                delayObservable.onNext(editable)
+            }
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+        }
+        configEditText.addTextChangedListener(changesWatcher)
+        titleEditText.addTextChangedListener(changesWatcher)
 
         compiledTableTextView.setOnClickListener {
             if (compiledTableTextView.text.isNotEmpty()) {
@@ -69,7 +83,7 @@ class ChangeConfigActivity : AppCompatActivity() {
         }
         findViewById(R.id.compileConfigBtn).setOnClickListener {
             lastJob ?. cancel()
-            lastJob = startCompile(rulesEditText.text.toString(), compiledTableTextView)
+            lastJob = startCompile(configEditText.text.toString(), compiledTableTextView)
         }
     }
 

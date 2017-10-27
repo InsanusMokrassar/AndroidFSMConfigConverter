@@ -19,7 +19,7 @@ class ConfigsDatabase(context: Context): SimpleDatabase<Config>(
     fun upsert(config: Config) {
         if (config.id == null) {
             insert(config)
-            config.id = find("config=\"${config.config}\" AND name=\"${config.name}\"").first().id
+            config.id = find("rules=\"${config.rules}\" AND title=\"${config.title}\"").first().id
         } else {
             update(config)
         }
@@ -33,11 +33,11 @@ class ConfigsDatabase(context: Context): SimpleDatabase<Config>(
 }
 
 data class Config internal constructor(
-        var config: String = "",
-        var name: String = "",
+        var rules: String = "",
+        var title: String = "",
         @PrimaryKey
         @Autoincrement
         internal var id: Int? = null
 ) : Serializable {
-    constructor(another: Config) : this(another.config, another.name, another.id)
+    constructor(another: Config) : this(another.rules, another.title, another.id)
 }

@@ -17,6 +17,6 @@ class ConfigViewHolder(
     private var current: Config? = null
     override fun refreshItem(item: Config) {
         current = item
-        itemView.findViewById<TextView>(android.R.id.text1).text = item.name
+        itemView.findViewById<TextView>(android.R.id.text1).text = item.title
     }
 }
