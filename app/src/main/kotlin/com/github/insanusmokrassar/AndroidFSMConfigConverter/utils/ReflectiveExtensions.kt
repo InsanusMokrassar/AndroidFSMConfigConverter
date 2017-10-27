@@ -1,7 +1,6 @@
 package com.github.insanusmokrassar.AndroidFSMConfigConverter.utils
 
 import kotlin.reflect.*
-import kotlin.reflect.full.declaredMembers
 import kotlin.reflect.full.instanceParameter
 import kotlin.reflect.full.memberProperties
 
@@ -54,15 +53,6 @@ fun KCallable<*>.isReturnNative() : Boolean {
 }
 
 /**
- * @return Список KCallable объектов, помеченных аннотацией [PrimaryKey].
- */
-fun KClass<*>.getPrimaryFields() : List<KCallable<*>> {
-    return getVariables().filter {
-        it.isPrimaryField()
-    }
-}
-
-/**
  * @return true если объект помечен аннотацией [PrimaryKey].
  */
 fun KProperty<*>.isPrimaryField() : Boolean {
@@ -82,32 +72,8 @@ fun KProperty<*>.isAutoincrement() : Boolean {
 }
 
 /**
- * @return true если поле является изменяемым.
- */
-fun KProperty<*>.isMutable() : Boolean {
-    return this is KMutableProperty
-}
-
-/**
- * @return Список объектов, которые должны быть включены в конструктор - val (неизменяемые)
- * и not null поля.
- */
-fun KClass<*>.getRequiredInConstructor() : List<KProperty<*>> {
-    return getVariables().filter {
-        !it.isMutable() || !it.isNullable()
-    }
-}
-
-/**
  * @return Список полей класса.
  */
 fun KClass<*>.getVariables() : List<KProperty<*>> {
     return this.memberProperties.toList()
-}
-
-/**
- * @return true, если объект [what] является последним в [List].
- */
-fun <T>Collection<T>.isLast(what: T): Boolean {
-    return indexOf(what) == size - 1
 }

@@ -105,13 +105,7 @@ fun <M: Any> KClass<M>.fromValuesMap(values : Map<KProperty<*>, Any?>): M {
                 )
             } ?: paramsList.add(null)
         }
-        val result = resultModelConstructor.call(*paramsList.toTypedArray())
-//        values.keys.forEach {
-//            if (!constructorRequiredVariables.contains(it)) {
-//                (it as KMutableProperty).setter.call(result, values[it])
-//            }
-//        }
-        return result
+        return resultModelConstructor.call(*paramsList.toTypedArray())
     }
 }
 
