@@ -5,13 +5,8 @@ import com.github.insanusmokrassar.AndroidFSMConfigConverter.R
 import com.github.insanusmokrassar.AndroidFSMConfigConverter.utils.Autoincrement
 import com.github.insanusmokrassar.AndroidFSMConfigConverter.utils.PrimaryKey
 
-fun Context.getConfigsDatabases(): SimpleDatabase<Config> {
-    return SimpleDatabase(
-            Config::class,
-            this,
-            getString(R.string.commonDatabase),
-            resources.getInteger(R.integer.configDatabaseCurrentVersion)
-    )
+fun Context.getConfigsDatabases(): ConfigsDatabase {
+    return ConfigsDatabase(this)
 }
 
 class ConfigsDatabase(context: Context): SimpleDatabase<Config>(
@@ -25,6 +20,12 @@ class ConfigsDatabase(context: Context): SimpleDatabase<Config>(
             insert(config)
         } else {
             update(config)
+        }
+    }
+
+    fun remove(config: Config) {
+        if (config.id != null) {
+            remove("id=${config.id}")
         }
     }
 }
