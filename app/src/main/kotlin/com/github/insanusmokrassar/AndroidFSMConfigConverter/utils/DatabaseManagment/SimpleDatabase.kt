@@ -34,7 +34,7 @@ open class SimpleDatabase<M: Any> (
         ) > 0
     }
 
-    fun find(where: String, orderBy: String, limit: String): List<M> {
+    fun find(where: String? = null, orderBy: String? = null, limit: String? = null): List<M> {
         return readableDatabase.query(
                 modelClass.tableName(),
                 null,
@@ -47,16 +47,20 @@ open class SimpleDatabase<M: Any> (
         ).extractAll(modelClass, true)
     }
 
-    fun update(value: M, where: String): Boolean {
-        return writableDatabase.update(
+    fun update(
+            value: M,
+            where: String? = null,
+            onConflict: Int = SQLiteDatabase.CONFLICT_REPLACE): Boolean {
+        return writableDatabase.updateWithOnConflict(
                 modelClass.tableName(),
                 value.toContentValues(),
                 where,
-                null
+                null,
+                onConflict
         ) > 0
     }
 
-    fun remove(where: String) {
+    fun remove(where: String? = null) {
         writableDatabase.delete(
                 modelClass.tableName(),
                 where,
