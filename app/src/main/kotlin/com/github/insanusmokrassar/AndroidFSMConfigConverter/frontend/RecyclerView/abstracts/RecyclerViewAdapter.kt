@@ -9,7 +9,8 @@ import kotlinx.coroutines.experimental.launch
 class RecyclerViewAdapter<T>(
         private val viewHolderFactory: (
                 parent: ViewGroup,
-                viewType: Int
+                viewType: Int,
+                adapter: RecyclerViewAdapter<T>
         ) -> AbstractViewHolder<T>
 ): RecyclerView.Adapter<AbstractViewHolder<T>>() {
     private val data = ArrayList<T>()
@@ -34,7 +35,7 @@ class RecyclerViewAdapter<T>(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): AbstractViewHolder<T> =
-            viewHolderFactory(parent!!, viewType)
+            viewHolderFactory(parent!!, viewType, this)
 
     fun addItems(vararg items: T) {
         data.addAll(items)
@@ -44,6 +45,10 @@ class RecyclerViewAdapter<T>(
     fun removeItem(i: Int) {
         data.removeAt(i)
         notifyItemRangeChanged(i, data.size)
+    }
+
+    fun removeItem(item: T) {
+        removeItem(data.indexOf(item))
     }
 
     private fun checkEmpty() {

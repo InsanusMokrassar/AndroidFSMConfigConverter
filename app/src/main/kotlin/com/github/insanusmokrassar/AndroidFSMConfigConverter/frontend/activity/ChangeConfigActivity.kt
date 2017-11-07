@@ -8,15 +8,15 @@ import android.support.v7.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.View
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
-import com.github.insanusmokrassar.FSMConfigConverter.compileFromConfig
-import com.github.insanusmokrassar.FSMConfigConverter.getContent
 import com.github.insanusmokrassar.AndroidFSMConfigConverter.R
 import com.github.insanusmokrassar.AndroidFSMConfigConverter.utils.DatabaseManagment.Config
 import com.github.insanusmokrassar.AndroidFSMConfigConverter.utils.DatabaseManagment.getConfigsDatabases
+import com.github.insanusmokrassar.FSMConfigConverter.FSMRulesDescriptor
 import io.reactivex.subjects.PublishSubject
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
@@ -31,9 +31,9 @@ class ChangeConfigActivity : AppCompatActivity() {
         setContentView(R.layout.activity_change_config)
         val databaseHelper = getConfigsDatabases()
         var lastJob: Job? = null
-        val compiledTableTextView = findViewById(R.id.compiledTableTextView) as TextView
-        val configEditText: EditText = (findViewById(R.id.configRulesEditText) as EditText)
-        val titleEditText: EditText = (findViewById(R.id.configTitleEditText) as EditText)
+        val compiledTableTextView = findViewById<TextView>(R.id.compiledTableTextView)
+        val configEditText = findViewById<TextView>(R.id.configRulesEditText)
+        val titleEditText = findViewById<TextView>(R.id.configTitleEditText)
 
         configEditText.setText(config.rules)
         titleEditText.setText(config.title)
@@ -81,7 +81,7 @@ class ChangeConfigActivity : AppCompatActivity() {
                 startActivity(shareIntent)
             }
         }
-        findViewById(R.id.compileConfigBtn).setOnClickListener {
+        findViewById<View>(R.id.compileConfigBtn).setOnClickListener {
             lastJob ?. cancel()
             lastJob = startCompile(configEditText.text.toString(), compiledTableTextView)
         }
@@ -91,11 +91,8 @@ class ChangeConfigActivity : AppCompatActivity() {
         return async {
             val content: String = try {
                 Log.i(ChangeConfigActivity::class.java.simpleName, "Thread: " + Thread.currentThread().name)
-                val preStates = compileFromConfig(from)
-                getContent(
-                        getString(R.string.realtimeGenerating),
-                        preStates
-                )
+                val descriptor = FSMRulesDescriptor(from)
+                descriptor.markdownContent
             } catch (e: Exception) {
                 getString(R.string.wrongExpression)
             }

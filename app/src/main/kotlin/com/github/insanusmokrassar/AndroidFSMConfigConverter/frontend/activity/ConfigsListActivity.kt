@@ -36,11 +36,11 @@ class ConfigsListActivity: AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        val configsList = findViewById(R.id.configsListRecyclerView) as RecyclerView
+        val configsList = findViewById<RecyclerView>(R.id.configsListRecyclerView)
         val adapter = RecyclerViewAdapter(
                 {
-                    parent: ViewGroup, _: Int ->
-                    ConfigViewHolder(layoutInflater, parent)
+                    parent: ViewGroup, _: Int, adapter: RecyclerViewAdapter<Config> ->
+                    ConfigViewHolder(adapter, layoutInflater, parent)
                 }
         )
         adapter.emptyView = findViewById(R.id.emptyConfigsTextView)
@@ -49,9 +49,7 @@ class ConfigsListActivity: AppCompatActivity() {
             try {
                 val configs = getConfigsDatabases().find().toTypedArray()
                 launch(UI) {
-                    adapter.addItems(
-                            *configs
-                    )
+                    adapter.addItems(*configs)
                     adapter.notifyDataSetChanged()
                 }
             } catch (e: Exception) {
