@@ -3,7 +3,6 @@ package com.github.insanusmokrassar.AndroidFSMConfigConverter.utils.DatabaseMana
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import com.github.insanusmokrassar.AndroidFSMConfigConverter.utils.isPrimaryField
 import kotlin.reflect.KClass
 
 open class SimpleDatabase<M: Any> (

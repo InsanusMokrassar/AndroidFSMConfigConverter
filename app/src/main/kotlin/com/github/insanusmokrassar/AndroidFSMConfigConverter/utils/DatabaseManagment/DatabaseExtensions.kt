@@ -6,7 +6,6 @@ import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 import com.github.insanusmokrassar.AndroidFSMConfigConverter.utils.*
 import kotlin.reflect.KClass
-import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty
 
 val nativeTypesMap = mapOf(
