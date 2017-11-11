@@ -3,6 +3,7 @@ package com.github.insanusmokrassar.AndroidFSMConfigConverter.utils.DatabaseMana
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import com.github.insanusmokrassar.AndroidFSMConfigConverter.utils.isPrimaryField
 import kotlin.reflect.KClass
 
 open class SimpleDatabase<M: Any> (
@@ -49,7 +50,13 @@ open class SimpleDatabase<M: Any> (
 
     fun update(
             value: M,
-            where: String? = null,
+            where: String? = value.toValuesMap().filter {
+                it.key.isPrimaryField()
+            }.map {
+                "${it.key.name}=${it.value}"
+            }.joinToString(
+                " & "
+            ),
             onConflict: Int = SQLiteDatabase.CONFLICT_REPLACE): Boolean {
         return writableDatabase.updateWithOnConflict(
                 modelClass.tableName(),

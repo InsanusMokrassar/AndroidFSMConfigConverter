@@ -35,8 +35,8 @@ class ChangeConfigActivity : AppCompatActivity() {
         val configEditText = findViewById<TextView>(R.id.configRulesEditText)
         val titleEditText = findViewById<TextView>(R.id.configTitleEditText)
 
-        configEditText.setText(config.rules)
-        titleEditText.setText(config.title)
+        configEditText.text = config.rules
+        titleEditText.text = config.title
 
         val delayObservable = PublishSubject.create<Editable>()
         delayObservable.debounce (
