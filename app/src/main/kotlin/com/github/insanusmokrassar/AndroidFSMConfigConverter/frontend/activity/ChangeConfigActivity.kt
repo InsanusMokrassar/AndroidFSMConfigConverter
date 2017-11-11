@@ -9,12 +9,12 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
-import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import com.github.insanusmokrassar.AndroidFSMConfigConverter.R
 import com.github.insanusmokrassar.AndroidFSMConfigConverter.utils.DatabaseManagment.Config
+import com.github.insanusmokrassar.AndroidFSMConfigConverter.utils.DatabaseManagment.ConfigsDatabase
 import com.github.insanusmokrassar.AndroidFSMConfigConverter.utils.DatabaseManagment.getConfigsDatabases
 import com.github.insanusmokrassar.FSMConfigConverter.FSMRulesDescriptor
 import io.reactivex.subjects.PublishSubject
@@ -25,18 +25,25 @@ import kotlinx.coroutines.experimental.launch
 import java.util.concurrent.TimeUnit
 
 class ChangeConfigActivity : AppCompatActivity() {
+    var configEditText: TextView? = null
+    var titleEditText: TextView? = null
+    var config: Config = Config()
+
+    var databaseHelper: ConfigsDatabase? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val config: Config = intent.extras[getString(R.string.configToEdit)] as? Config ?: Config()
+        config = intent.extras[getString(R.string.configToEdit)] as? Config
+                ?: Config()
         setContentView(R.layout.activity_change_config)
-        val databaseHelper = getConfigsDatabases()
+        databaseHelper = getConfigsDatabases()
         var lastJob: Job? = null
         val compiledTableTextView = findViewById<TextView>(R.id.compiledTableTextView)
-        val configEditText = findViewById<TextView>(R.id.configRulesEditText)
-        val titleEditText = findViewById<TextView>(R.id.configTitleEditText)
+        configEditText = findViewById<TextView>(R.id.configRulesEditText)
+        titleEditText = findViewById<TextView>(R.id.configTitleEditText)
 
-        configEditText.text = config.rules
-        titleEditText.text = config.title
+        configEditText ?. text = config.rules
+        titleEditText ?. text = config.title
 
         val delayObservable = PublishSubject.create<Editable>()
         delayObservable.debounce (
@@ -44,13 +51,13 @@ class ChangeConfigActivity : AppCompatActivity() {
                 TimeUnit.MILLISECONDS
         ).subscribe({
             try {
-                config.rules = configEditText.text.toString()
-                config.title = if (titleEditText.text.isEmpty()) {
+                config.rules = configEditText ?. text.toString()
+                config.title = if (titleEditText ?. text ?. isEmpty() == true) {
                     getString(R.string.tempTitle)
                 } else {
-                    titleEditText.text.toString()
+                    titleEditText ?. text.toString()
                 }
-                databaseHelper.upsert(config)
+                databaseHelper ?. upsert(config)
                 launch (UI) {
                     Toast.makeText(
                             this@ChangeConfigActivity,
@@ -69,8 +76,8 @@ class ChangeConfigActivity : AppCompatActivity() {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
         }
-        configEditText.addTextChangedListener(changesWatcher)
-        titleEditText.addTextChangedListener(changesWatcher)
+        configEditText ?. addTextChangedListener(changesWatcher)
+        titleEditText ?. addTextChangedListener(changesWatcher)
 
         compiledTableTextView.setOnClickListener {
             if (compiledTableTextView.text.isNotEmpty()) {
@@ -83,7 +90,7 @@ class ChangeConfigActivity : AppCompatActivity() {
         }
         findViewById<View>(R.id.compileConfigBtn).setOnClickListener {
             lastJob ?. cancel()
-            lastJob = startCompile(configEditText.text.toString(), compiledTableTextView)
+            lastJob = startCompile(configEditText ?. text.toString(), compiledTableTextView)
         }
     }
 
@@ -101,5 +108,16 @@ class ChangeConfigActivity : AppCompatActivity() {
                 tableTextView.isClickable = true
             }
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        config.rules = configEditText ?. text.toString()
+        config.title = if (titleEditText ?. text ?. isEmpty() == true) {
+            getString(R.string.tempTitle)
+        } else {
+            titleEditText ?. text.toString()
+        }
+        databaseHelper ?. upsert(config) ?: getConfigsDatabases().upsert(config)
     }
 }

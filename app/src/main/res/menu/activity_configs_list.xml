@@ -6,4 +6,9 @@
         android:id="@+id/createConfigMenuItem"
         android:icon="@drawable/ic_add"
         app:showAsAction="ifRoom"/>
+    <item
+        android:title="@string/file"
+        android:id="@+id/openFromFileMenuItem"
+        android:icon="@drawable/ic_open_file"
+        app:showAsAction="ifRoom"/>
 </menu>
