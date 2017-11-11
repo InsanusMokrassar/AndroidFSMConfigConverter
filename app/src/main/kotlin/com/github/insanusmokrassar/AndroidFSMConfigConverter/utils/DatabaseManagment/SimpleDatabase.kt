@@ -35,7 +35,11 @@ open class SimpleDatabase<M: Any> (
         ) > 0
     }
 
-    fun find(where: String? = null, orderBy: String? = null, limit: String? = null): List<M> {
+    fun find(
+            where: String? = null,
+            orderBy: String? = null,
+            limit: String? = null
+    ): List<M> {
         return readableDatabase.query(
                 modelClass.tableName(),
                 null,
@@ -50,14 +54,9 @@ open class SimpleDatabase<M: Any> (
 
     fun update(
             value: M,
-            where: String? = value.toValuesMap().filter {
-                it.key.isPrimaryField()
-            }.map {
-                "${it.key.name}=${it.value}"
-            }.joinToString(
-                " & "
-            ),
-            onConflict: Int = SQLiteDatabase.CONFLICT_REPLACE): Boolean {
+            where: String? = value.getPrimaryFieldsSearchQuery(),
+            onConflict: Int = SQLiteDatabase.CONFLICT_REPLACE
+    ): Boolean {
         return writableDatabase.updateWithOnConflict(
                 modelClass.tableName(),
                 value.toContentValues(),
@@ -71,6 +70,14 @@ open class SimpleDatabase<M: Any> (
         writableDatabase.delete(
                 modelClass.tableName(),
                 where,
+                null
+        )
+    }
+
+    fun remove(value: M) {
+        writableDatabase.delete(
+                modelClass.tableName(),
+                value.getPrimaryFieldsSearchQuery(),
                 null
         )
     }

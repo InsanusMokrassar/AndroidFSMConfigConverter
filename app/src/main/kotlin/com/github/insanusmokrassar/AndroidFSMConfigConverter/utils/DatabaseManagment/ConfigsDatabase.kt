@@ -24,12 +24,6 @@ class ConfigsDatabase(context: Context): SimpleDatabase<Config>(
             update(config)
         }
     }
-
-    fun remove(config: Config) {
-        if (config.id != null) {
-            remove("id=${config.id}")
-        }
-    }
 }
 
 data class Config internal constructor(

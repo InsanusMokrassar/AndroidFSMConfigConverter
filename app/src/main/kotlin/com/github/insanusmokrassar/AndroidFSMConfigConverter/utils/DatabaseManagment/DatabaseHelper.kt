@@ -88,6 +88,16 @@ fun Any.toValuesMap() : Map<KProperty<*>, Any> {
     return values
 }
 
+fun Any.getPrimaryFieldsSearchQuery(): String {
+    return toValuesMap().filter {
+        it.key.isPrimaryField()
+    }.map {
+        "${it.key.name}=${it.value}"
+    }.joinToString(
+            " & "
+    )
+}
+
 fun <M: Any> KClass<M>.fromValuesMap(values : Map<KProperty<*>, Any?>): M {
     if (constructors.isEmpty()) {
         throw IllegalStateException("For some of reason, can't create correct realisation of model")
