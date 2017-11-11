@@ -47,8 +47,11 @@ class RecyclerViewAdapter<T>(
         notifyItemRangeChanged(i, data.size)
     }
 
-    fun removeItem(item: T) {
-        removeItem(data.indexOf(item))
+    fun removeItem(vararg items: T) {
+        items.forEach {
+            data.remove(it)
+        }
+        notifyDataSetChanged()
     }
 
     private fun checkEmpty() {
