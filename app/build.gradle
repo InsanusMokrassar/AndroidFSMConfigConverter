@@ -25,26 +25,31 @@ android {
             coroutines "enable"
         }
     }
+    packagingOptions {
+        exclude 'META-INF/LICENSE-LGPL-2.1.txt'
+        exclude 'META-INF/LICENSE-LGPL-3.txt'
+        exclude 'META-INF/LICENSE-W3C-TEST'
+    }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutins_version"
-    compile "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlin_coroutins_version"
-    compile "com.github.insanusmokrassar:FSMConfigConverter:1.1"
-    compile 'com.android.support:appcompat-v7:27.+'
-    compile 'com.android.support:design:27.+'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutins_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlin_coroutins_version"
+    implementation "com.github.insanusmokrassar:FSMConfigConverter:1.1"
+    implementation 'com.android.support:appcompat-v7:27.+'
+    implementation 'com.android.support:design:27.+'
 
-    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
 // Because RxAndroid releases are few and far between, it is recommended you also
 // explicitly depend on RxJava's latest version for bug fixes and new features.
-    compile 'io.reactivex.rxjava2:rxjava:2.1.5'
-    compile 'io.reactivex.rxjava2:rxkotlin:2.1.0'
+    implementation 'io.reactivex.rxjava2:rxjava:2.1.5'
+    implementation 'io.reactivex.rxjava2:rxkotlin:2.1.0'
 
-    testCompile 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
 }

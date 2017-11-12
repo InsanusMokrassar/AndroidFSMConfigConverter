@@ -1,14 +1,10 @@
 package com.github.insanusmokrassar.AndroidFSMConfigConverter.frontend.activity
 
-import android.content.Intent
-import android.content.Intent.ACTION_SEND
-import android.content.Intent.EXTRA_TEXT
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
@@ -39,17 +35,18 @@ class ChangeConfigActivity : AppCompatActivity() {
         databaseHelper = getConfigsDatabases()
         var lastJob: Job? = null
         val compiledTableTextView = findViewById<TextView>(R.id.compiledTableTextView)
-        configEditText = findViewById<TextView>(R.id.configRulesEditText)
-        titleEditText = findViewById<TextView>(R.id.configTitleEditText)
+        configEditText = findViewById(R.id.configRulesEditText)
+        titleEditText = findViewById(R.id.configTitleEditText)
 
         configEditText ?. text = config.rules
         titleEditText ?. text = config.title
 
-        val delayObservable = PublishSubject.create<Editable>()
-        delayObservable.debounce (
+        val editChangeable = PublishSubject.create<Editable>()
+        val editObservable = editChangeable.debounce (
                 resources.getInteger(R.integer.awaitEditedTimeInMillis).toLong(),
                 TimeUnit.MILLISECONDS
-        ).subscribe({
+        )
+        editObservable.subscribe({
             try {
                 config.rules = configEditText ?. text.toString()
                 config.title = if (titleEditText ?. text ?. isEmpty() == true) {
@@ -69,29 +66,19 @@ class ChangeConfigActivity : AppCompatActivity() {
                 e.printStackTrace()
             }
         })
+        editObservable.subscribe({
+            lastJob ?. cancel()
+            lastJob = startCompile(configEditText ?. text.toString(), compiledTableTextView)
+        })
         val changesWatcher = object: TextWatcher {
             override fun afterTextChanged(editable: Editable) {
-                delayObservable.onNext(editable)
+                editChangeable.onNext(editable)
             }
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
         }
         configEditText ?. addTextChangedListener(changesWatcher)
         titleEditText ?. addTextChangedListener(changesWatcher)
-
-        compiledTableTextView.setOnClickListener {
-            if (compiledTableTextView.text.isNotEmpty()) {
-                val shareIntent = Intent()
-                shareIntent.action = ACTION_SEND
-                shareIntent.putExtra(EXTRA_TEXT, compiledTableTextView.text)
-                shareIntent.type = "text/plain"
-                startActivity(shareIntent)
-            }
-        }
-        findViewById<View>(R.id.compileConfigBtn).setOnClickListener {
-            lastJob ?. cancel()
-            lastJob = startCompile(configEditText ?. text.toString(), compiledTableTextView)
-        }
     }
 
     private fun startCompile(from: String, tableTextView: TextView): Job {
