@@ -93,7 +93,7 @@ fun Any.getPrimaryFieldsSearchQuery(): String {
     }.map {
         "${it.key.name}=${it.value}"
     }.joinToString(
-            " & "
+            " AND "
     )
 }
 
